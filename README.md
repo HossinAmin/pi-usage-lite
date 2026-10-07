@@ -27,22 +27,22 @@ Provider data is shown only when Pi has compatible credentials configured.
 
 ## Install
 
-Install directly from GitHub:
+Install a GitHub release tag. Pinning a release prevents later changes on `main` or `dev` from affecting your installation unexpectedly:
 
 ```bash
-pi install git:github.com/HossinAmin/pi-usage-lite
+pi install git:github.com/HossinAmin/pi-usage-lite@v0.1.0
 ```
 
-Restart Pi or run:
+Check [GitHub Releases](https://github.com/HossinAmin/pi-usage-lite/releases) for the newest tag, then restart Pi or run:
 
 ```text
 /reload
 ```
 
-To try it without installing it permanently:
+To try a release without installing it permanently:
 
 ```bash
-pi -e git:github.com/HossinAmin/pi-usage-lite
+pi -e git:github.com/HossinAmin/pi-usage-lite@v0.1.0
 ```
 
 For local development:
@@ -111,6 +111,26 @@ export OPENCODE_ZEN_AUTH_COOKIE="your-open-code-auth-cookie"
 - Usage endpoints and response formats are provider-controlled and may change.
 - The footer displays the last successful value if a refresh fails, so values can be stale until the next successful refresh.
 - This project is not affiliated with Pi, OpenAI, Anthropic, Moonshot AI, Kimi, or OpenCode.
+
+## Release workflow
+
+Development happens on the `dev` branch or feature branches. Releases are created from `main`.
+
+1. Make changes on `dev` or a feature branch.
+2. Bump `package.json` before opening a pull request into `main`:
+
+   ```bash
+   npm version patch --no-git-tag-version
+   ```
+
+   Use `minor` or `major` instead of `patch` when appropriate.
+
+3. Merge the pull request into `main`.
+4. The [`Release`](./.github/workflows/release.yml) workflow validates the version, creates the matching `vX.Y.Z` tag, and publishes a GitHub Release with generated notes.
+
+The [`Version check`](./.github/workflows/version-check.yml) workflow blocks pull requests into `main` when `package.json` still has the base branch's version. This keeps every merge into `main` releasable.
+
+Users should install release tags such as `@v0.1.0`, not the moving `main` or `dev` branches.
 
 ## Development
 
