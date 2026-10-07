@@ -1,0 +1,45 @@
+{
+  "name": "pi-usage-lite",
+  "version": "0.1.0",
+  "description": "A minimal Pi Coding Agent extension that keeps selected provider quotas visible in the footer.",
+  "type": "module",
+  "license": "MIT",
+  "author": {
+    "name": "HossinAmin",
+    "email": "hossinamin70@gmail.com"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/HossinAmin/pi-usage-lite.git"
+  },
+  "homepage": "https://github.com/HossinAmin/pi-usage-lite#readme",
+  "bugs": {
+    "url": "https://github.com/HossinAmin/pi-usage-lite/issues"
+  },
+  "keywords": [
+    "pi-package",
+    "pi-extension",
+    "pi",
+    "pi-coding-agent",
+    "usage",
+    "quota",
+    "statusline",
+    "codex",
+    "kimi",
+    "claude",
+    "opencode"
+  ],
+  "files": [
+    "src",
+    "README.md",
+    "LICENSE"
+  ],
+  "pi": {
+    "extensions": [
+      "./src/index.ts"
+    ]
+  },
+  "peerDependencies": {
+    "@earendil-works/pi-coding-agent": "*"
+  }
+}
