@@ -1,14 +1,14 @@
 # pi-usage-lite
 
-A minimal, dependency-free [Pi Coding Agent](https://pi.dev) extension that keeps selected provider usage and quota information visible in the footer.
+A minimal, dependency-free [Pi Coding Agent](https://pi.dev) extension that keeps selected provider usage and quota information visible in a dedicated row below the editor.
 
-The extension is intentionally small: one TypeScript file, no runtime package dependencies, automatic footer refreshes, and two commands.
+The extension is intentionally small: one TypeScript file, no runtime package dependencies, automatic display refreshes, and two commands.
 
 > **Status:** early release. Some provider usage endpoints are undocumented and may change without notice.
 
 ## Features
 
-- Shows usage in Pi's footer for the active model provider.
+- Shows usage in its own row below Pi's editor for the active model provider, keeping it separate from other extensions' footer statuses without replacing Pi's footer.
 - Refreshes when a session starts, when the model changes, after each agent run, and every 60 seconds.
 - Keeps the last known values visible when a later refresh fails.
 - Provides `/usage` to refresh the active provider.
@@ -23,7 +23,7 @@ The extension is intentionally small: one TypeScript file, no runtime package de
 | Claude Code Bridge | Five-hour, weekly, Opus, Sonnet, and extra-usage information when available |
 | OpenCode Zen | Numeric credit balance and spending information |
 
-Quota-window providers use the same footer style: window label, usage bar, used percentage, and reset countdown. OpenCode Zen remains numeric because it is credit-based rather than quota-based.
+Quota-window providers use the same display style: window label, usage bar, used percentage, and reset countdown. OpenCode Zen remains numeric because it is credit-based rather than quota-based.
 
 Provider data is shown only when Pi has compatible credentials configured.
 
@@ -59,7 +59,7 @@ pi -e .
 
 ### `/usage`
 
-Refreshes the footer entry for the currently selected model's provider.
+Refreshes the usage row for the currently selected model's provider.
 
 ### `/usage-all`
 
@@ -111,7 +111,8 @@ export OPENCODE_ZEN_AUTH_COOKIE="your-open-code-auth-cookie"
 
 - The extension registers `/usage`. Do not load it alongside another extension that registers the same command.
 - Usage endpoints and response formats are provider-controlled and may change.
-- The footer displays the last successful value if a refresh fails, so values can be stale until the next successful refresh.
+- The usage row displays the last successful value if a refresh fails, so values can be stale until the next successful refresh.
+- The extension uses Pi's widget API below the editor and does not replace Pi's built-in footer renderer.
 - This project is not affiliated with Pi, OpenAI, Anthropic, Moonshot AI, Kimi, or OpenCode.
 
 ## Release workflow

@@ -1,7 +1,7 @@
 /**
  * Usage Extension
  *
- * Shows provider usage/quota in the footer. Currently supports Kimi for
+ * Shows provider usage/quota in a dedicated row below the editor. Currently supports Kimi for
  * Coding (5-hour + weekly quotas), OpenAI Codex (its available rate-limit
  * windows), Claude Code Bridge (Claude plan windows), and OpenCode Zen credits.
  * The status only appears while the active
@@ -48,7 +48,7 @@ function fmtCountdown(resetIso: string): string {
 interface UsageProvider {
 	/** Provider id used to resolve authentication. */
 	providerId: string;
-	/** Short label shown in the footer and command output. */
+	/** Short label shown in the usage row and command output. */
 	label: string;
 	/** Return true if this handler serves the given provider id. */
 	matches(provider: string): boolean;
@@ -475,7 +475,7 @@ export default function (pi: ExtensionAPI) {
 		const handler = handlerFor(ctx);
 		if (!handler) {
 			if (visible) {
-				ctx.ui.setStatus(STATUS_ID, undefined);
+				ctx.ui.setWidget(STATUS_ID, undefined, { placement: "belowEditor" });
 				visible = false;
 			}
 			return;
@@ -486,11 +486,15 @@ export default function (pi: ExtensionAPI) {
 			const model = ctx.model?.id ?? "";
 			const provider = ctx.model?.provider ?? "";
 			if (text) {
-				ctx.ui.setStatus(STATUS_ID, ctx.ui.theme.fg("dim", `${handler.label} ${model} · ${text}`));
+				ctx.ui.setWidget(STATUS_ID, [ctx.ui.theme.fg("dim", `${handler.label} ${model} · ${text}`)], {
+					placement: "belowEditor",
+				});
 				succeededProviders.add(provider);
 			} else if (!succeededProviders.has(provider)) {
 				// Never fetched successfully for this provider: show that the extension is alive.
-				ctx.ui.setStatus(STATUS_ID, ctx.ui.theme.fg("dim", `${handler.label} ${model} · usage n/a`));
+				ctx.ui.setWidget(STATUS_ID, [ctx.ui.theme.fg("dim", `${handler.label} ${model} · usage n/a`)], {
+					placement: "belowEditor",
+				});
 			}
 			// On later failures: keep the last known values on screen.
 			visible = true;
@@ -526,7 +530,7 @@ export default function (pi: ExtensionAPI) {
 
 	// Manual refresh: /usage
 	pi.registerCommand("usage", {
-		description: "Refresh the usage display in the footer",
+		description: "Refresh the usage display below the editor",
 		handler: async (_args, ctx) => {
 			await refresh(ctx);
 			ctx.ui.notify("Usage refreshed", "info");

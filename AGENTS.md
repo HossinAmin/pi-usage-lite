@@ -41,6 +41,7 @@ Merging into `main` triggers the GitHub release workflow, which typechecks the e
 
 ## Provider display conventions
 
+- Render usage with `setWidget(..., { placement: "belowEditor" })` so it gets a dedicated row without replacing Pi's footer. Do not use `setStatus()`, which Pi combines with other extension statuses on one footer row.
 - Quota-window providers use the shared format: label, progress bar, used percentage, reset countdown.
 - Kimi must use progress bars like Codex and Claude, not `used/limit` text.
 - OpenCode Zen is credit-based, not quota-based. Keep Zen numeric-only and do not use a progress bar for it.
