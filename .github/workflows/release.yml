@@ -8,6 +8,7 @@ on:
 
 permissions:
   contents: write
+  id-token: write
 
 concurrency:
   group: pi-usage-lite-release
@@ -15,7 +16,7 @@ concurrency:
 
 jobs:
   release:
-    name: Create GitHub release
+    name: Create GitHub and npm release
     runs-on: ubuntu-latest
 
     steps:
@@ -38,12 +39,14 @@ jobs:
       - name: Read package version
         id: package
         run: |
+          NAME="$(bun -e 'const pkg = await Bun.file("package.json").json(); console.log(pkg.name)')"
           VERSION="$(bun -e 'const pkg = await Bun.file("package.json").json(); console.log(pkg.version)')"
           if ! [[ "$VERSION" =~ ^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)(-[0-9A-Za-z.-]+)?(\+[0-9A-Za-z.-]+)?$ ]]; then
             echo "package.json version '$VERSION' is not valid semver" >&2
             exit 1
           fi
           TAG="v${VERSION}"
+          echo "name=${NAME}" >> "$GITHUB_OUTPUT"
           echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
           echo "tag=${TAG}" >> "$GITHUB_OUTPUT"
 
@@ -92,14 +95,40 @@ jobs:
             --generate-notes \
             --latest
 
+      - name: Set up Node for npm trusted publishing
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          registry-url: https://registry.npmjs.org
+
+      - name: Install an npm version with trusted publishing support
+        run: npm install --global npm@11
+
+      - name: Check whether npm version exists
+        id: npm
+        env:
+          PACKAGE_NAME: ${{ steps.package.outputs.name }}
+          VERSION: ${{ steps.package.outputs.version }}
+        run: |
+          if npm view "${PACKAGE_NAME}@${VERSION}" version >/dev/null 2>&1; then
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Publish package to npm
+        if: steps.npm.outputs.exists == 'false'
+        run: npm publish
+
       - name: Report result
         env:
           TAG: ${{ steps.package.outputs.tag }}
           TAG_EXISTS: ${{ steps.tag.outputs.exists }}
           RELEASE_EXISTS: ${{ steps.release.outputs.exists }}
+          NPM_EXISTS: ${{ steps.npm.outputs.exists }}
         run: |
-          if [[ "${TAG_EXISTS}" == "true" && "${RELEASE_EXISTS}" == "true" ]]; then
-            echo "Release ${TAG} already exists; nothing to do."
+          if [[ "${TAG_EXISTS}" == "true" && "${RELEASE_EXISTS}" == "true" && "${NPM_EXISTS}" == "true" ]]; then
+            echo "Release ${TAG} already exists on GitHub and npm; nothing to do."
           else
-            echo "Release ${TAG} is available."
+            echo "Release ${TAG} is available on GitHub and npm."
           fi

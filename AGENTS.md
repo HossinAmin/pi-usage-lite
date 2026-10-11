@@ -37,7 +37,7 @@ Do not commit npm artifacts such as `package-lock.json`. The Bun lockfile is `bu
 bun pm pkg set version=<next-version>
 ```
 
-Merging into `main` triggers the GitHub release workflow, which typechecks the extension and creates the matching `v<version>` tag and GitHub Release.
+Merging into `main` triggers the release workflow, which typechecks the extension, publishes it to npm through trusted publishing, and creates the matching `v<version>` tag and GitHub Release.
 
 ## Provider display conventions
 

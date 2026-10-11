@@ -29,23 +29,31 @@ Provider data is shown only when Pi has compatible credentials configured.
 
 ## Install
 
-Install a GitHub release tag. Pinning a release prevents later changes on `main` or `dev` from affecting your installation unexpectedly:
+Install the latest release from npm:
 
 ```bash
-pi install git:github.com/HossinAmin/pi-usage-lite@v0.1.1
+pi install npm:pi-usage-lite
 ```
 
-Check [GitHub Releases](https://github.com/HossinAmin/pi-usage-lite/releases) for the newest tag, then restart Pi or run:
+Then restart Pi or run:
 
 ```text
 /reload
 ```
 
-To try a release without installing it permanently:
+To pin a specific version, use an exact npm version:
 
 ```bash
-pi -e git:github.com/HossinAmin/pi-usage-lite@v0.1.1
+pi install npm:pi-usage-lite@0.1.1
 ```
+
+GitHub release tags remain available as an alternative:
+
+```bash
+pi install git:github.com/HossinAmin/pi-usage-lite@v0.1.1
+```
+
+Check [GitHub Releases](https://github.com/HossinAmin/pi-usage-lite/releases) for the newest version.
 
 For local development:
 
@@ -129,11 +137,33 @@ Development happens on the `dev` branch or feature branches. Releases are create
    Use the next appropriate semver version instead of `0.1.2`.
 
 3. Merge the pull request into `main`.
-4. The [`Release`](./.github/workflows/release.yml) workflow validates the version, creates the matching `vX.Y.Z` tag, and publishes a GitHub Release with generated notes.
+4. The [`Release`](./.github/workflows/release.yml) workflow validates the version, creates the matching `vX.Y.Z` tag, publishes the package to npm through trusted publishing, and creates a GitHub Release with generated notes.
 
 The [`Version check`](./.github/workflows/version-check.yml) workflow blocks pull requests into `main` when `package.json` still has the base branch's version. This keeps every merge into `main` releasable.
 
-Users should install release tags such as `@v0.1.1`, not the moving `main` or `dev` branches.
+### One-time npm setup
+
+The package name must be claimed with one manual publication before npm allows a trusted publisher to be configured. Publish the current `main` version from a detached temporary worktree so unreleased development changes are not included:
+
+```bash
+git worktree add --detach /tmp/pi-usage-lite-npm-bootstrap origin/main
+cd /tmp/pi-usage-lite-npm-bootstrap
+npm login
+bun publish --access public
+cd -
+git worktree remove /tmp/pi-usage-lite-npm-bootstrap
+```
+
+Then open the `pi-usage-lite` package settings on npm and add a GitHub Actions trusted publisher with:
+
+- Organization or user: `HossinAmin`
+- Repository: `pi-usage-lite`
+- Workflow filename: `release.yml`
+- Allowed action: `npm publish`
+
+Future merges to `main` publish without a long-lived npm token. Because the package includes the `pi-package` keyword, npm publication also makes it eligible for automatic discovery on [pi.dev/packages](https://pi.dev/packages).
+
+Users should install npm releases, or pinned GitHub tags such as `@v0.1.1`, rather than the moving `main` or `dev` branches.
 
 ## Development
 

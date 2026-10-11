@@ -10,7 +10,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+ssh://git@github.com/HossinAmin/pi-usage-lite.git"
+    "url": "https://github.com/HossinAmin/pi-usage-lite.git"
   },
   "homepage": "https://github.com/HossinAmin/pi-usage-lite#readme",
   "bugs": {
@@ -38,6 +38,9 @@
     "extensions": [
       "./src/index.ts"
     ]
+  },
+  "publishConfig": {
+    "access": "public"
   },
   "peerDependencies": {
     "@earendil-works/pi-coding-agent": "*"
