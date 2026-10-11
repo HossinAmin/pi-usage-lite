@@ -37,10 +37,11 @@ Do not commit npm artifacts such as `package-lock.json`. The Bun lockfile is `bu
 bun pm pkg set version=<next-version>
 ```
 
-Merging into `main` triggers the GitHub release workflow, which typechecks the extension and creates the matching `v<version>` tag and GitHub Release.
+Merging into `main` triggers the release workflow, which typechecks the extension, publishes it to npm through trusted publishing, and creates the matching `v<version>` tag and GitHub Release.
 
 ## Provider display conventions
 
+- Render usage with `setWidget(..., { placement: "belowEditor" })` so it gets a dedicated row without replacing Pi's footer. Do not use `setStatus()`, which Pi combines with other extension statuses on one footer row.
 - Quota-window providers use the shared format: label, progress bar, used percentage, reset countdown.
 - Kimi must use progress bars like Codex and Claude, not `used/limit` text.
 - OpenCode Zen is credit-based, not quota-based. Keep Zen numeric-only and do not use a progress bar for it.

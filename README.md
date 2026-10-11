@@ -1,14 +1,16 @@
 # pi-usage-lite
 
-A minimal, dependency-free [Pi Coding Agent](https://pi.dev) extension that keeps selected provider usage and quota information visible in the footer.
+A minimal, dependency-free [Pi Coding Agent](https://pi.dev) extension that keeps selected provider usage and quota information visible in a dedicated row below the editor.
 
-The extension is intentionally small: one TypeScript file, no runtime package dependencies, automatic footer refreshes, and two commands.
+The extension is intentionally small: one TypeScript file, no runtime package dependencies, automatic display refreshes, and two commands.
+
+**Packages:** [Pi package](https://pi.dev/packages/pi-usage-lite) · [npm package](https://www.npmjs.com/package/pi-usage-lite)
 
 > **Status:** early release. Some provider usage endpoints are undocumented and may change without notice.
 
 ## Features
 
-- Shows usage in Pi's footer for the active model provider.
+- Shows usage in its own row below Pi's editor for the active model provider, keeping it separate from other extensions' footer statuses without replacing Pi's footer.
 - Refreshes when a session starts, when the model changes, after each agent run, and every 60 seconds.
 - Keeps the last known values visible when a later refresh fails.
 - Provides `/usage` to refresh the active provider.
@@ -23,43 +25,35 @@ The extension is intentionally small: one TypeScript file, no runtime package de
 | Claude Code Bridge | Five-hour, weekly, Opus, Sonnet, and extra-usage information when available |
 | OpenCode Zen | Numeric credit balance and spending information |
 
-Quota-window providers use the same footer style: window label, usage bar, used percentage, and reset countdown. OpenCode Zen remains numeric because it is credit-based rather than quota-based.
+Quota-window providers use the same display style: window label, usage bar, used percentage, and reset countdown. OpenCode Zen remains numeric because it is credit-based rather than quota-based.
 
 Provider data is shown only when Pi has compatible credentials configured.
 
 ## Install
 
-Install a GitHub release tag. Pinning a release prevents later changes on `main` or `dev` from affecting your installation unexpectedly:
+Install the latest release from npm using Pi:
 
 ```bash
-pi install git:github.com/HossinAmin/pi-usage-lite@v0.1.1
+pi install npm:pi-usage-lite
 ```
 
-Check [GitHub Releases](https://github.com/HossinAmin/pi-usage-lite/releases) for the newest tag, then restart Pi or run:
+Then restart Pi or run:
 
 ```text
 /reload
 ```
 
-To try a release without installing it permanently:
+Package pages are available on [Pi](https://pi.dev/packages/pi-usage-lite) and [npm](https://www.npmjs.com/package/pi-usage-lite). To pin a specific version, use an exact npm version:
 
 ```bash
-pi -e git:github.com/HossinAmin/pi-usage-lite@v0.1.1
-```
-
-For local development:
-
-```bash
-git clone git@github.com:HossinAmin/pi-usage-lite.git
-cd pi-usage-lite
-pi -e .
+pi install npm:pi-usage-lite@0.1.1
 ```
 
 ## Commands
 
 ### `/usage`
 
-Refreshes the footer entry for the currently selected model's provider.
+Refreshes the usage row for the currently selected model's provider.
 
 ### `/usage-all`
 
@@ -111,28 +105,9 @@ export OPENCODE_ZEN_AUTH_COOKIE="your-open-code-auth-cookie"
 
 - The extension registers `/usage`. Do not load it alongside another extension that registers the same command.
 - Usage endpoints and response formats are provider-controlled and may change.
-- The footer displays the last successful value if a refresh fails, so values can be stale until the next successful refresh.
+- The usage row displays the last successful value if a refresh fails, so values can be stale until the next successful refresh.
+- The extension uses Pi's widget API below the editor and does not replace Pi's built-in footer renderer.
 - This project is not affiliated with Pi, OpenAI, Anthropic, Moonshot AI, Kimi, or OpenCode.
-
-## Release workflow
-
-Development happens on the `dev` branch or feature branches. Releases are created from `main`.
-
-1. Make changes on `dev` or a feature branch.
-2. Bump `package.json` before opening a pull request into `main`:
-
-   ```bash
-   bun pm pkg set version=0.1.2
-   ```
-
-   Use the next appropriate semver version instead of `0.1.2`.
-
-3. Merge the pull request into `main`.
-4. The [`Release`](./.github/workflows/release.yml) workflow validates the version, creates the matching `vX.Y.Z` tag, and publishes a GitHub Release with generated notes.
-
-The [`Version check`](./.github/workflows/version-check.yml) workflow blocks pull requests into `main` when `package.json` still has the base branch's version. This keeps every merge into `main` releasable.
-
-Users should install release tags such as `@v0.1.1`, not the moving `main` or `dev` branches.
 
 ## Development
 
