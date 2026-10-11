@@ -24,15 +24,21 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
+      - name: Set up Bun
+        uses: oven-sh/setup-bun@v2
         with:
-          node-version: 22
+          bun-version: 1.3.14
+
+      - name: Install development dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Typecheck extension
+        run: bun run typecheck
 
       - name: Read package version
         id: package
         run: |
-          VERSION="$(node -p "require('./package.json').version")"
+          VERSION="$(bun -e 'const pkg = await Bun.file("package.json").json(); console.log(pkg.version)')"
           if ! [[ "$VERSION" =~ ^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)(-[0-9A-Za-z.-]+)?(\+[0-9A-Za-z.-]+)?$ ]]; then
             echo "package.json version '$VERSION' is not valid semver" >&2
             exit 1

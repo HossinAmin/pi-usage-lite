@@ -2,7 +2,7 @@
 
 A minimal, dependency-free [Pi Coding Agent](https://pi.dev) extension that keeps selected provider usage and quota information visible in the footer.
 
-The extension is intentionally small: one TypeScript file, no runtime npm dependencies, automatic footer refreshes, and two commands.
+The extension is intentionally small: one TypeScript file, no runtime package dependencies, automatic footer refreshes, and two commands.
 
 > **Status:** early release. Some provider usage endpoints are undocumented and may change without notice.
 
@@ -21,7 +21,9 @@ The extension is intentionally small: one TypeScript file, no runtime npm depend
 | Kimi for Coding | Five-hour and weekly plan windows |
 | OpenAI Codex | Available rate-limit windows and reset times |
 | Claude Code Bridge | Five-hour, weekly, Opus, Sonnet, and extra-usage information when available |
-| OpenCode Zen | Credits through the official credits API, with an optional dashboard fallback |
+| OpenCode Zen | Numeric credit balance and spending information |
+
+Quota-window providers use the same footer style: window label, usage bar, used percentage, and reset countdown. OpenCode Zen remains numeric because it is credit-based rather than quota-based.
 
 Provider data is shown only when Pi has compatible credentials configured.
 
@@ -30,7 +32,7 @@ Provider data is shown only when Pi has compatible credentials configured.
 Install a GitHub release tag. Pinning a release prevents later changes on `main` or `dev` from affecting your installation unexpectedly:
 
 ```bash
-pi install git:github.com/HossinAmin/pi-usage-lite@v0.1.0
+pi install git:github.com/HossinAmin/pi-usage-lite@v0.1.1
 ```
 
 Check [GitHub Releases](https://github.com/HossinAmin/pi-usage-lite/releases) for the newest tag, then restart Pi or run:
@@ -42,7 +44,7 @@ Check [GitHub Releases](https://github.com/HossinAmin/pi-usage-lite/releases) fo
 To try a release without installing it permanently:
 
 ```bash
-pi -e git:github.com/HossinAmin/pi-usage-lite@v0.1.0
+pi -e git:github.com/HossinAmin/pi-usage-lite@v0.1.1
 ```
 
 For local development:
@@ -65,7 +67,7 @@ Checks every supported provider that appears connected and displays the availabl
 
 ## OpenCode Zen dashboard fallback
 
-The extension first tries OpenCode's official credits API using Pi's configured `opencode` provider credentials.
+The extension first tries OpenCode's official credits API using Pi's configured `opencode` provider credentials. Credit information is displayed numerically, without a quota bar.
 
 If that API is unavailable, it can use an optional dashboard configuration. Create this file only if you need the fallback:
 
@@ -100,7 +102,7 @@ export OPENCODE_ZEN_AUTH_COOKIE="your-open-code-auth-cookie"
 ## Security and privacy
 
 - This repository does not contain provider API keys, OAuth tokens, cookies, or workspace credentials.
-- At runtime, the extension reads credentials from Pi's provider authentication, supported environment variables, or the optional local configuration files described above.
+- At runtime, the extension reads credentials from Pi's provider authentication, supported environment variables, Claude Code's OAuth configuration, or the optional local configuration files described above.
 - Credentials are used only to request usage information from their corresponding provider endpoints.
 - Like every Pi extension, this extension runs with your operating-system user permissions. Review the source before installing it.
 - The OpenCode dashboard fallback relies on web-session cookies and undocumented page/server behavior. It is more fragile than the official credits API and may stop working after an OpenCode deployment.
@@ -120,17 +122,17 @@ Development happens on the `dev` branch or feature branches. Releases are create
 2. Bump `package.json` before opening a pull request into `main`:
 
    ```bash
-   npm version patch --no-git-tag-version
+   bun pm pkg set version=0.1.2
    ```
 
-   Use `minor` or `major` instead of `patch` when appropriate.
+   Use the next appropriate semver version instead of `0.1.2`.
 
 3. Merge the pull request into `main`.
 4. The [`Release`](./.github/workflows/release.yml) workflow validates the version, creates the matching `vX.Y.Z` tag, and publishes a GitHub Release with generated notes.
 
 The [`Version check`](./.github/workflows/version-check.yml) workflow blocks pull requests into `main` when `package.json` still has the base branch's version. This keeps every merge into `main` releasable.
 
-Users should install release tags such as `@v0.1.0`, not the moving `main` or `dev` branches.
+Users should install release tags such as `@v0.1.1`, not the moving `main` or `dev` branches.
 
 ## Development
 
@@ -139,6 +141,12 @@ The extension source is [`src/index.ts`](./src/index.ts).
 Useful local commands:
 
 ```bash
+# Install development dependencies
+bun install
+
+# Typecheck the extension
+bun run typecheck
+
 # Try the package locally
 pi -e .
 
@@ -146,7 +154,7 @@ pi -e .
 ${EDITOR:-nano} src/index.ts
 ```
 
-There is no build step; Pi loads the TypeScript source through Jiti.
+There is no build step for users; Pi loads the TypeScript source through Jiti. Development dependencies are used only for local typechecking and release validation.
 
 ## License
 

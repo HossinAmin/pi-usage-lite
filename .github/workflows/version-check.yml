@@ -20,10 +20,10 @@ jobs:
           ref: ${{ github.event.pull_request.head.sha }}
           fetch-depth: 0
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
+      - name: Set up Bun
+        uses: oven-sh/setup-bun@v2
         with:
-          node-version: 22
+          bun-version: 1.3.14
 
       - name: Compare package version with base branch
         env:
@@ -32,8 +32,8 @@ jobs:
           git fetch origin "${BASE_BRANCH}" --depth=1
           git show "origin/${BASE_BRANCH}:package.json" > /tmp/base-package.json
 
-          BASE_VERSION="$(node -p "require('/tmp/base-package.json').version")"
-          PR_VERSION="$(node -p "require('./package.json').version")"
+          BASE_VERSION="$(bun -e 'const pkg = await Bun.file("/tmp/base-package.json").json(); console.log(pkg.version)')"
+          PR_VERSION="$(bun -e 'const pkg = await Bun.file("package.json").json(); console.log(pkg.version)')"
           SEMVER_RE='^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)(-[0-9A-Za-z.-]+)?(\+[0-9A-Za-z.-]+)?$'
 
           if ! [[ "$PR_VERSION" =~ $SEMVER_RE ]]; then
@@ -45,7 +45,7 @@ jobs:
             echo "Bump package.json version before merging into ${BASE_BRANCH}." >&2
             echo "Current ${BASE_BRANCH} version: ${BASE_VERSION}" >&2
             echo "Pull request version:       ${PR_VERSION}" >&2
-            echo "Example: npm version patch --no-git-tag-version" >&2
+            echo "Example: bun pm pkg set version=0.1.2" >&2
             exit 1
           fi
 

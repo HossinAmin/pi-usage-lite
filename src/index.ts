@@ -80,6 +80,20 @@ interface KimiUsagesResponse {
 	}>;
 }
 
+function parseKimiCount(value: string | undefined): number | undefined {
+	if (!value) return undefined;
+	const parsed = Number(value.replace(/,/g, ""));
+	return Number.isFinite(parsed) && parsed >= 0 ? parsed : undefined;
+}
+
+function formatKimiWindow(label: string, detail: KimiQuotaDetail | undefined): string | undefined {
+	const used = parseKimiCount(detail?.used);
+	const limit = parseKimiCount(detail?.limit);
+	if (used === undefined || limit === undefined || limit <= 0) return undefined;
+	const percent = Math.round((used / limit) * 100);
+	return `${label} ${progressBar(percent)} ${percent}% ↻${fmtCountdown(detail?.resetTime ?? "")}`;
+}
+
 const kimiCoding: UsageProvider = {
 	providerId: "kimi-coding",
 	label: "kimi",
@@ -107,13 +121,10 @@ const kimiCoding: UsageProvider = {
 		const session = data.limits?.[0]?.detail; // 5-hour session window
 		const weekly = data.usage; // weekly quota
 
-		const parts: string[] = [];
-		if (session?.used != null && session?.limit != null) {
-			parts.push(`5h ${session.used}/${session.limit} ↻${fmtCountdown(session.resetTime ?? "")}`);
-		}
-		if (weekly?.used != null && weekly?.limit != null) {
-			parts.push(`wk ${weekly.used}/${weekly.limit} ↻${fmtCountdown(weekly.resetTime ?? "")}`);
-		}
+		const parts = [
+			formatKimiWindow("5h", session),
+			formatKimiWindow("wk", weekly),
+		].filter((part): part is string => part !== undefined);
 		return parts.length > 0 ? parts.join(" · ") : undefined;
 	},
 };
@@ -420,7 +431,7 @@ async function fetchZenCreditsApi(ctx: ExtensionContext): Promise<string | undef
 	const used = data.used_credits;
 	const remaining = typeof data.remaining_credits === "number" ? data.remaining_credits : total - used;
 	const percent = total > 0 ? Math.round((used / total) * 100) : 0;
-	return `${remaining.toFixed(2)}/${total.toFixed(2)} credits · ${progressBar(percent)} ${percent}%`;
+	return `${remaining.toFixed(2)}/${total.toFixed(2)} credits · ${percent}% used`;
 }
 
 const openCodeZen: UsageProvider = {
